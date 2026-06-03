@@ -3,6 +3,8 @@ import struct
 
 # FUNCTION DEFINITIONS
 def send_str(string):
+    game.stdin.write(len(string).to_bytes(2, 'little'))
+    game.stdin.flush()
     game.stdin.write(string.encode('utf-8'))
     game.stdin.flush()
 
