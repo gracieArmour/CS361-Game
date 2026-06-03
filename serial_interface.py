@@ -7,7 +7,7 @@ def send_str(string):
     game.stdin.flush()
 
 def recv_str(length):
-    return game.stdout.read(length)
+    return game.stdout.read(length).decode('utf-8')
 
 def send_int(num):
     game.stdin.write(num)
@@ -28,11 +28,11 @@ while True:
     service = recv_str(3)
 
     match (service):
-        case b'pnt': # Points Service
+        case 'pnt': # Points Service
             print("Calling Points Service...")
             points_id = recv_str(3)
             request_type = recv_str(1)
-            if request_type == b'g':
+            if request_type == 'g':
                 request_type = "GET"
             else:
                 request_type = "POST"
@@ -41,13 +41,13 @@ while True:
             print(points_id, request_type, added_points)
 
             send_str('hello')
-        case b'sgn': # Sign Service
+        case 'sgn': # Sign Service
             print("Calling Sign Service...")
-        case b'dth': # Random Death Message Service
+        case 'dth': # Random Death Message Service
             print("Calling Random Death Message Service...")
-        case b'hsc': # High Score Service
+        case 'hsc': # High Score Service
             print("Calling High Score Service...")
         case _:
             pass
     
-    service=b''
+    service=''
