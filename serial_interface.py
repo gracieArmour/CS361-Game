@@ -1,5 +1,12 @@
 import subprocess as sp
 import struct
+import json
+import time
+
+# CONSTANTS
+## Points consts
+PNT_REQUEST_FILE = "../Points-Microservice/points_request.json"
+PNT_RESPONSE_FILE = "../Points-Microservice/points_response.json"
 
 # FUNCTION DEFINITIONS
 def send_str(string):
@@ -12,7 +19,7 @@ def recv_str(length):
     return game.stdout.read(length).decode('utf-8')
 
 def send_int(num):
-    game.stdin.write(num)
+    game.stdin.write(num.to_bytes(2, 'little'))
     game.stdin.flush()
 
 def recv_int():
@@ -32,23 +39,37 @@ while True:
     match (service):
         case 'pnt': # Points Service
             print("Calling Points Service...")
-            points_id = recv_str(3)
+            points_request = {}
+
+            points_request['points_id'] = recv_str(3)
             request_type = recv_str(1)
             if request_type == 'g':
-                request_type = "GET"
+                points_request['request_type'] = "GET"
             else:
-                request_type = "POST"
-            added_points = recv_int()
+                points_request['request_type'] = "POST"
+            points_request['added_points'] = recv_int()
 
-            print(points_id, request_type, added_points)
+            print(points_request)
 
-            send_str('hello')
+            with open(PNT_REQUEST_FILE, "w", encoding="utf-8") as f:
+                json.dump(points_request, f)
+            
+            time.sleep(1)
+
+            with open(PNT_RESPONSE_FILE, "r", encoding="utf-8") as f:
+                points_response = json.load(f)
+            
+            send_int(points_response['Points'])
+
         case 'sgn': # Sign Service
             print("Calling Sign Service...")
+
         case 'dth': # Random Death Message Service
             print("Calling Random Death Message Service...")
+
         case 'hsc': # High Score Service
             print("Calling High Score Service...")
+
         case _:
             pass
     
