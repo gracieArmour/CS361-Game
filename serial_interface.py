@@ -122,7 +122,7 @@ def handle_response():
         service = 'nil'
     else:
         response = response_queue.pop(0)
-        service = response.service
+        service = response['service']
     
     send_str(service)
 
@@ -169,21 +169,21 @@ def handle_queue():
         with open(SGN_RESPONSE_FILE, "r", encoding="utf-8") as f:
             new_state = json.load(f)
         
-        if (new_state.req_id != waiting['sgn']['pipe_state']):
+        if (new_state['req_id'] != waiting['sgn']['pipe_state']):
             pass
 
     if (waiting['dth']['waiting']):
         with open(DTH_RESPONSE_FILE, "r", encoding="utf-8") as f:
             new_state = json.load(f)
         
-        if (new_state.req_id != waiting['dth']['pipe_state']):
+        if (new_state['req_id'] != waiting['dth']['pipe_state']):
             pass
 
     if (waiting['hsc']['waiting']):
         with open(HSC_RESPONSE_FILE, "r", encoding="utf-8") as f:
             new_state = json.load(f)
         
-        if (new_state.req_id != waiting['hsc']['pipe_state']):
+        if (new_state['req_id'] != waiting['hsc']['pipe_state']):
             pass
 
 
@@ -198,5 +198,5 @@ game = sp.Popen([r"C:\Program Files (x86)\PICO-8\pico8.exe",
 while True:
     handle_request()
     handle_response()
-    # handle_queue()
+    handle_queue()
 
