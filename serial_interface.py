@@ -28,7 +28,13 @@ HSC_RESPONSE_FILE = "../High-Score-Microservice/high_score_response.json"
 waiting = {
     'pnt': {
         'waiting': False,
-        'pipe_state': ''
+        'request_id': 0
+    },
+    'ptr': {
+        'waiting': False,
+        'wait_counter': 0,
+        'points_id': '',
+        'request_id': 0
     },
     'sgn': {
         'waiting': False,
@@ -61,7 +67,7 @@ def recv_str(length):
     return game.stdout.read(length).decode('utf-8')
 
 def send_int(num):
-    game.stdin.write(num.to_bytes(2, 'little'))
+    game.stdin.write(struct.pack('<1h', num))
     game.stdin.flush()
 
 def recv_int():
@@ -76,6 +82,8 @@ def handle_request():
             return
         case 'pnt':
             pnt_request()
+        case 'ptr':
+            pnt_reset_request()
         case 'sgn':
             sgn_request()
         case 'dth':
@@ -85,30 +93,47 @@ def handle_request():
 
 def pnt_request():
     print("Calling Points Service...")
+    request_id = math.floor(random.random() * 9998) + 1
 
     # get request data
     points_request = {}
+    points_request['request_id'] = request_id
 
     points_request['points_id'] = recv_str(3)
     request_type = recv_str(1)
     if (request_type == 'g'):
-        points_request['request_type'] = 'get'
+        points_request['request_type'] = 'GET'
     else:
-        points_request['request_type'] = 'post'
+        points_request['request_type'] = 'POST'
     points_request['added_points'] = recv_int()
-
-    print(points_request) # DEBUG
-
-    # store current pipe state for listener
-    with open(PNT_RESPONSE_FILE, "r", encoding="utf-8") as f:
-        waiting['pnt']['pipe_state'] = f.read()
 
     # send request to Points Microservice
     with open(PNT_REQUEST_FILE, "w", encoding="utf-8") as f:
         json.dump(points_request, f)
     
     # enable response pipe listener
+    waiting['pnt']['request_id'] = request_id
     waiting['pnt']['waiting'] = True
+
+def pnt_reset_request():
+    print("Resetting points...")
+    request_id = math.floor(random.random() * 9998) + 1
+
+    reset_request = {}
+    reset_request['request_id'] = request_id
+    points_id = recv_str(3)
+    reset_request['points_id'] = points_id
+    reset_request['request_type'] = 'GET'
+    reset_request['added_points'] = 0
+
+    # send request to Points Microservice
+    with open(PNT_REQUEST_FILE, "w", encoding="utf-8") as f:
+        json.dump(reset_request, f)
+    
+    # enable response pipe listener
+    waiting['ptr']['request_id'] = request_id
+    waiting['ptr']['points_id'] = points_id
+    waiting['ptr']['waiting'] = True
 
 def sgn_request():
     print("Calling Sign Service...")
@@ -180,6 +205,8 @@ def handle_response():
             return
         case 'pnt':
             pnt_response(response)
+        case 'ptr':
+            return # no additional logic, call code is sufficent signal
         case 'sgn':
             sgn_response(response)
         case 'dth':
@@ -196,14 +223,13 @@ def sgn_response(response):
     for i in range(0,num_lines):
         send_str(response['lines'][i])
     
-
 def dth_response(response):
     send_str(response['message'])
 
 def hsc_response(response):
     send_str(response['type'])
     
-    if ('get'==response['type']):
+    if ('post'==response['type']):
         send_str(response['highscore'])
     else:
         num_entries = len(response['entries'])
@@ -218,17 +244,55 @@ def handle_queue():
     global response_queue
 
     if (waiting['pnt']['waiting']):
+        empty_response = False
         with open(PNT_RESPONSE_FILE, "r", encoding="utf-8") as f:
-            new_state = f.read()
+            contents = f.read()
+            if (contents != ""):
+                new_state = json.loads(contents)
+            else:
+                empty_response = True
         
-        if (new_state != waiting['pnt']['pipe_state']):
-            with open(PNT_RESPONSE_FILE, "r", encoding="utf-8") as f:
-                points_response = json.load(f)
+        if ((not empty_response) and (new_state['request_id'] == waiting['pnt']['request_id'])):
             response_queue.append({
                 'service': 'pnt',
-                'Points': points_response['Points']
+                'Points': new_state['Points']
             })
             waiting['pnt']['waiting'] = False
+    
+    if (waiting['ptr']['waiting']):
+        empty_response = False
+        with open(PNT_RESPONSE_FILE, "r", encoding="utf-8") as f:
+            contents = f.read()
+            if (contents != ""):
+                new_state = json.loads(contents)
+            else:
+                empty_response = True
+        
+        if ((not empty_response) and (new_state['request_id'] == waiting['ptr']['request_id'])):
+            match (waiting['ptr']['wait_counter']):
+                case 0:
+                    reset_request = {
+                        'request_id': (new_state['request_id'] + 1),
+                        'points_id': waiting['ptr']['points_id'],
+                        'request_type': 'POST',
+                        'added_points': (new_state['Points'] * -1)
+                    }
+
+                    # send request to Points Microservice
+                    with open(PNT_REQUEST_FILE, "w", encoding="utf-8") as f:
+                        json.dump(reset_request, f)
+                    
+                    waiting['ptr']['request_id'] = new_state['request_id'] + 1
+                    waiting['ptr']['wait_counter'] += 1
+                
+                case 1:
+                    response_queue.append({
+                        'service': 'ptr'
+                    })
+
+                    waiting['ptr']['wait_counter'] = 0
+                    waiting['ptr']['points_id'] = ''
+                    waiting['ptr']['waiting'] = False
 
     if (waiting['sgn']['waiting']):
         empty_response = False
@@ -272,7 +336,9 @@ def handle_queue():
                 empty_response = True
         
         if ((not empty_response) and (new_state['req_id'] == waiting['hsc']['req_id'])):
-            pass
+            new_state['service'] = 'hsc'
+            response_queue.append(new_state)
+            waiting['hsc']['waiting'] = False
 
 
 # INIT LOOP
@@ -285,7 +351,8 @@ all_pipes = [PNT_REQUEST_FILE,PNT_RESPONSE_FILE, SGN_REQUEST_FILE,SGN_RESPONSE_F
 #                 content = f.read()
 #         except Exception:
 #             continue
-#         pipes_started[i] = True
+#         else:
+#             pipes_started[i] = True
             
 
 # start pico-8 and cartridge as subprocess
