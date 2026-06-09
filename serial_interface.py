@@ -111,6 +111,8 @@ def pnt_request():
     with open(PNT_REQUEST_FILE, "w", encoding="utf-8") as f:
         json.dump(points_request, f)
     
+    print("Points request sent: ",points_request)
+    
     # enable response pipe listener
     waiting['pnt']['request_id'] = request_id
     waiting['pnt']['waiting'] = True
@@ -216,6 +218,7 @@ def handle_response():
 
 def pnt_response(response):
     send_int(response['Points'])
+    print("Points response received: ",response)
 
 def sgn_response(response):
     num_lines = len(response['lines'])
