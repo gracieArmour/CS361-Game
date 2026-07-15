@@ -1,0 +1,57 @@
+[
+    {
+        "x": 1,
+        "y": 3,
+        "text": "you figured it out! walk into things to interact with them"
+    },
+    {
+        "x": 5,
+        "y": 4,
+        "text": "ooo, a coin! those are worth 100 points!"
+    },
+    {
+        "x": 8,
+        "y": 4,
+        "text": "you can check your inventory with x"
+    },
+    {
+        "x": 1,
+        "y": 7,
+        "text": "beware: deadly spikes!"
+    },
+    {
+        "x": 10,
+        "y": 8,
+        "text": "be careful, spikes are quicker than they look..."
+    },
+    {
+        "x": 9,
+        "y": 1,
+        "text": "congrats! a spare key!"
+    },
+    {
+        "x": 13,
+        "y": 8,
+        "text": "almost out of this labrynth..."
+    },
+    {
+        "x": 18,
+        "y": 6,
+        "text": "count your keys carefully..."
+    },
+    {
+        "x": 27,
+        "y": 10,
+        "text": "they say blue flowers like to grow near hidden things"
+    },
+    {
+        "x": 51,
+        "y": 26,
+        "text": "victory draws near!"
+    },
+    {
+        "x": 52,
+        "y": 18,
+        "text": "the final gauntlet begins, good luck"
+    }
+]

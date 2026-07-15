@@ -8,20 +8,20 @@ import math
 
 # CONSTANTS
 ## Points consts
-PNT_REQUEST_FILE = "../Points-Microservice/points_request.json"
-PNT_RESPONSE_FILE = "../Points-Microservice/points_response.json"
+PNT_REQUEST_FILE = "./points_request.json"
+PNT_RESPONSE_FILE = "./points_response.json"
 
 ## Sign consts
-SGN_REQUEST_FILE = "../Signs-Microservice/signs_request.json"
-SGN_RESPONSE_FILE = "../Signs-Microservice/signs_response.json"
+SGN_REQUEST_FILE = "./signs_request.json"
+SGN_RESPONSE_FILE = "./signs_response.json"
 
 ## Death Message consts
-DTH_REQUEST_FILE = "../Death-Message-Microservice/death_message_request.json"
-DTH_RESPONSE_FILE = "../Death-Message-Microservice/death_message_response.json"
+DTH_REQUEST_FILE = "./death_message_request.json"
+DTH_RESPONSE_FILE = "./death_message_response.json"
 
 ## High score consts
-HSC_REQUEST_FILE = "../High-Score-Microservice/high_score_request.json"
-HSC_RESPONSE_FILE = "../High-Score-Microservice/high_score_response.json"
+HSC_REQUEST_FILE = "./high_score_request.json"
+HSC_RESPONSE_FILE = "./high_score_response.json"
 
 
 # GLOBAL VARS
@@ -368,7 +368,7 @@ game = sp.Popen([r"C:\Program Files (x86)\PICO-8\pico8.exe",
 random.seed(datetime.now().timestamp())
 
 # MAIN LOOP
-while True:
+while game.poll() == None:
     handle_request()
     handle_response()
     handle_queue()
