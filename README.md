@@ -19,10 +19,10 @@ This service stores, formats, and serves the text of all signs in the game.
 ### [The Death Message Service](https://github.com/CS-361-Coder-Club-Group/Death-Message-Microservice)
 This service stores, randomly selects, and serves messages for the "game over" screen from a pre-written list.
 
-### The Points Service
+### [The Points Service](https://github.com/CS-361-Coder-Club-Group/Points-Microservice)
 This service stores and manages running totals of points, identified by text-based IDs. It handles adding and subtracting points from existing totals, and telling the game how many points the player now has.
 
-This service was almost entirely coded by another group member, and so I do not want to make its original repository public without their permission.
+This service was almost entirely coded by one of my group members, Corinne Davila ([coridav](https://github.com/coridav)), and is provided here with permission.
 
 ### [The High Score Service](https://github.com/CS-361-Coder-Club-Group/High-Score-Microservice)
 This service stores a persistent list of high scores, and handles checking new scores against the list to determine and inform the game if a new high score has been achieved.
