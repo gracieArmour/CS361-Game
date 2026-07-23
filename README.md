@@ -1,4 +1,4 @@
-# Stop and Smell the Roses (Microservices Edition)
+# Stop and Smell the Irises (Microservices Edition)
 A short adventure game made in Pico-8, with Python microservices, for CS361 Software Engineering I.
 
 This project was made in collaboration with a team of group members, but the final result includes only 1 service not coded by myself. All code in `points_service.py` was written by a groupmate, Corinne Davila ([coridav](https://github.com/coridav)), except for minor compatibility changes made for integration into this project. All other code is my own unless otherwise noted in code comments.
